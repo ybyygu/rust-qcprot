@@ -5,7 +5,6 @@ version = "0.0.1"
 authors = ["Wenping Guo <ybyygu@gmail.com>"]
 
 [dependencies]
-#nalgebra = "*"
 quicli = "*"
 approx = "*"
 # b0e6604f-7105-46c3-bd7e-7663243bc213 ends here

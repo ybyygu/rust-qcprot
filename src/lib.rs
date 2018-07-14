@@ -1,8 +1,13 @@
 // [[file:~/Workspace/Programming/rust-libs/rust-qcprot/qcprot.note::1871ed71-da12-49da-967c-5e2ecca97b05][1871ed71-da12-49da-967c-5e2ecca97b05]]
-// Almost a direct translation of qcprot.c to rust by Wenping Guo (ybyygu@gmail.com)
+// Author of Rust Port:
+//                 Wenping Guo
+//                 Synefuels China Technology Co.Ltd.
+//                 Beijing, China
 //
-// original information
-// --------------------
+//                 ybyygu@gmail.com
+//
+// Original copyright notice
+// -------------------------
 //
 // File:           qcprot.c
 // Version:        1.5
@@ -90,11 +95,23 @@
 #[macro_use] extern crate quicli;
 use quicli::prelude::*;
 
-// Calculate the inner product of two structures.
-// Input:
-// coords1 -- reference structure
-// coords2 -- candidate structure
-// weight  -- the weight array
+/// Calculate the inner product of two structures.
+///
+/// Parameters
+/// ----------
+/// coords1: reference structure
+/// coords2: candidate structure
+/// weight : the weight array
+///
+/// Notes
+/// -----
+/// 1. You MUST center the structures, coords1 and coords2, before calling this function.
+/// 2. Coordinates are stored as Nx3 arrays instead of 3xN as in original implementation
+///
+/// Return
+/// ------
+/// (arr_a, E0): inner product array and E0 (inputs for fast_calc_rmsd_and_rotation)
+///
 pub fn inner_product
     (
         coords1: &Vec<[f64; 3]>,
@@ -104,6 +121,7 @@ pub fn inner_product
 {
     let natoms = coords1.len();
     debug_assert!(natoms == coords2.len());
+    debug_assert!(natoms == weight.len());
 
     let mut mat_a = [0.0; 9];
 
@@ -122,7 +140,7 @@ pub fn inner_product
         let y2 = coords2[i][1];
         let z2 = coords2[i][2];
 
-        g2 *= wi * (x2.powi(2) + y2.powi(2) + z2.powi(2));
+        g2 += wi * (x2.powi(2) + y2.powi(2) + z2.powi(2));
 
         mat_a[0] += x1 * x2;
         mat_a[1] += x1 * y2;
@@ -133,8 +151,8 @@ pub fn inner_product
         mat_a[5] += y1 * z2;
 
         mat_a[6] += z1 * x2;
-        mat_a[6] += z1 * y2;
-        mat_a[7] += z1 * z2;
+        mat_a[7] += z1 * y2;
+        mat_a[8] += z1 * z2;
     }
 
     (
@@ -444,5 +462,35 @@ pub fn calc_rmsd_rotational_matrix(
     let x = fast_calc_rmsd_and_rotation(&mat_a, E0, wsum, -1.0);
 
     Ok(x)
+}
+
+/// test data provided in main.c
+pub fn prepare_test_data() -> (Vec<[f64; 3]>, Vec<[f64; 3]>, Vec<f64>) {
+    let mut frag_a = vec![
+        [ -2.803, -15.373, 24.556],
+        [  0.893, -16.062, 25.147],
+        [  1.368, -12.371, 25.885],
+        [ -1.651, -12.153, 28.177],
+        [ -0.440, -15.218, 30.068],
+        [  2.551, -13.273, 31.372],
+        [  0.105, -11.330, 33.567],
+    ];
+
+    let mut frag_b = vec![
+        [-14.739, -18.673, 15.040],
+        [-12.473, -15.810, 16.074],
+        [-14.802, -13.307, 14.408],
+        [-17.782, -14.852, 16.171],
+        [-16.124, -14.617, 19.584],
+        [-15.029, -11.037, 18.902],
+        [-18.577, -10.001, 17.996],
+    ];
+
+    let mut weight = [0.0; 7];
+    for i in 0..7 {
+        weight[i] = i as f64 + 1.0;
+    }
+
+    (frag_a, frag_b, weight.to_vec())
 }
 // 1871ed71-da12-49da-967c-5e2ecca97b05 ends here

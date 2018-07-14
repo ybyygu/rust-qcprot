@@ -6,15 +6,7 @@ use qcprot::*;
 
 #[test]
 fn test_center_coords() {
-    let mut frag = vec![
-        [ -2.803, -15.373, 24.556],
-        [  0.893, -16.062, 25.147],
-        [  1.368, -12.371, 25.885],
-        [ -1.651, -12.153, 28.177],
-        [ -0.440, -15.218, 30.068],
-        [  2.551, -13.273, 31.372],
-        [  0.105, -11.330, 33.567],
-    ];
+    let (mut frag, _, _) = prepare_test_data();
 
     let natoms = frag.len();
     let mut arr_w = Vec::with_capacity(natoms);
@@ -36,6 +28,25 @@ fn test_center_coords() {
         for j in 0..3 {
             assert_relative_eq!(frag_expected[i][j], frag[i][j], epsilon=1e-3);
         }
+    }
+}
+
+#[test]
+fn test_qcprot() {
+    let (mut frag_a, mut frag_b, weight) = prepare_test_data();
+    let (rmsd, rot) = calc_rmsd_rotational_matrix(&mut frag_a, &mut frag_b, Some(&weight)).expect("qcprot rot");
+    assert_relative_eq!(0.745016, rmsd, epsilon=1e-3);
+
+    let rot_expected = [
+         0.77227551,    0.63510272,   -0.01533190,
+        -0.44544846,    0.52413614,   -0.72584914,
+        -0.45295276,    0.56738509,    0.68768304,
+    ];
+
+    let rot = rot.expect("rot matrix");
+    println!("{:#?}", rot);
+    for i in 0..9 {
+        assert_relative_eq!(rot_expected[i], rot[i], epsilon=1e-4);
     }
 }
 // bb2a93d1-814d-480a-a777-78afca20044a ends here
