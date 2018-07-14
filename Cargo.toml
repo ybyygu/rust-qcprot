@@ -1,0 +1,11 @@
+# [[file:~/Workspace/Programming/rust-libs/rust-qcprot/qcprot.note::b0e6604f-7105-46c3-bd7e-7663243bc213][b0e6604f-7105-46c3-bd7e-7663243bc213]]
+[package]
+name = "qcprot"
+version = "0.0.1"
+authors = ["Wenping Guo <ybyygu@gmail.com>"]
+
+[dependencies]
+#nalgebra = "*"
+quicli = "*"
+approx = "*"
+# b0e6604f-7105-46c3-bd7e-7663243bc213 ends here
